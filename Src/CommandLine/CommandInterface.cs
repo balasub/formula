@@ -2139,7 +2139,7 @@ namespace Microsoft.Formula.CommandLine
         private void DoFetchConstraints(string s) 
         {
             var cmdParts = s.Split(cmdSplitChars, 3, StringSplitOptions.RemoveEmptyEntries);
-            if (cmdParts.Length < 2 || cmdParts.Length > 5)
+            if (cmdParts.Length < 2 || cmdParts.Length > 3)
             {
                 sink.WriteMessageLine(FetchConstraintsMsg, SeverityKind.Warning);
                 return;
