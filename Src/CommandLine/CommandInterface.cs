@@ -2138,15 +2138,50 @@ namespace Microsoft.Formula.CommandLine
 
         private void DoFetchConstraints(string s) 
         {
-            var cmdParts = s.Split(cmdSplitChars, 3, StringSplitOptions.RemoveEmptyEntries);
-            if (cmdParts.Length < 2 || cmdParts.Length > 3)
+            // Split the command string to get task id and file index
+            var cmdParts = s.Split(cmdSplitChars, StringSplitOptions.RemoveEmptyEntries);
+            if (cmdParts.Length != 3)
             {
-                sink.WriteMessageLine(FetchConstraintsMsg, SeverityKind.Warning);
+                sink.WriteMessageLine("Invalid command format. Expected format: 'ct <task_id> <file_index>'", SeverityKind.Warning);
+                return;
+            }
+            // Parse task id and file index
+            if (!int.TryParse(cmdParts[1], out int taskId))
+            {
+                sink.WriteMessageLine(string.Format("{0} is not a valid task id", cmdParts[1]), SeverityKind.Warning);
                 return;
             }
 
-            sink.WriteMessageLine("Fetching constraints...");
+            // Retrieve the task
+            TaskKind kind;
+            System.Threading.Tasks.Task task;
+            if (!taskManager.TryGetTask(taskId, out task, out kind))
+            {
+                sink.WriteMessageLine(string.Format("{0} is not a valid task id", taskId), SeverityKind.Warning);
+                return;
+            }
+
+            // Ensure the task is completed
+            if (!task.IsCompleted)
+            {
+                sink.WriteMessageLine(string.Format("Task {0} is still running.", taskId), SeverityKind.Warning);
+                return;
+            }
+
+            // Fetch the Solver object from the task result
+            SolveResult result = ((System.Threading.Tasks.Task<SolveResult>)task).Result;
+            var solver = result.Solver;
+
+            // Fetch and print constraints in SMT-LIB2 format
+            using (var writer = new System.IO.StringWriter())
+            {
+                solver.ToSMT2(writer);
+                string smtLib2Format = writer.ToString();
+                sink.WriteMessageLine(smtLib2Format);
+            }
+
         } 
+
 
         private void DoConfigHelp(string s)
         {
