@@ -9,6 +9,7 @@ namespace Microsoft.Formula.CommandLine
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    
 
     using API;
     using API.Nodes;
@@ -2138,33 +2139,20 @@ namespace Microsoft.Formula.CommandLine
 
         private void DoFetchConstraints(string s)
         {
-            var cmdParts = s.Split(cmdSplitChars, 4, StringSplitOptions.RemoveEmptyEntries);
-            if (cmdParts.Length < 2 || cmdParts.Length > 5)
+            var cmdParts = s.Split(cmdSplitChars, 3, StringSplitOptions.RemoveEmptyEntries);
+            if (cmdParts.Length < 2 || cmdParts.Length > 3)
             {
                 sink.WriteMessageLine(FetchConstraintsMsg, SeverityKind.Warning);
                 return;
             }
 
             int taskId;
-            int solNum = 0;
-            bool isAppExtract = cmdParts.Length % 2 == 0;
-            var modName = isAppExtract ? cmdParts[1].Trim() : cmdParts[2].Trim();
-
             if (!int.TryParse(cmdParts[0], out taskId))
             {
                 sink.WriteMessageLine(string.Format("{0} is not task id", cmdParts[0]), SeverityKind.Warning);
                 return;
             }
-            else if (string.IsNullOrEmpty(modName))
-            {
-                sink.WriteMessageLine(ExtractMsg, SeverityKind.Warning);
-                return;
-            }
-            else if (!isAppExtract && !int.TryParse(cmdParts[1], out solNum))
-            {
-                sink.WriteMessageLine(string.Format("{0} is not solution number", cmdParts[1]), SeverityKind.Warning);
-                return;
-            }
+
 
             TaskKind kind;
             System.Threading.Tasks.Task task;
@@ -2173,12 +2161,7 @@ namespace Microsoft.Formula.CommandLine
                 sink.WriteMessageLine(string.Format("{0} is not an task id", cmdParts[0]), SeverityKind.Warning);
                 return;
             }
-            else if (isAppExtract && kind != TaskKind.Apply)
-            {
-                sink.WriteMessageLine(string.Format("{0} is not an apply id", cmdParts[0]), SeverityKind.Warning);
-                return;
-            }
-            else if (!isAppExtract && kind != TaskKind.Solve)
+            else if (kind != TaskKind.Solve)
             {
                 sink.WriteMessageLine(string.Format("{0} is not an solve id", cmdParts[0]), SeverityKind.Warning);
                 return;
@@ -2189,41 +2172,19 @@ namespace Microsoft.Formula.CommandLine
                 return;
             }
 
-            System.Threading.Tasks.Task<AST<Program>> bldTask = null;
-            if (isAppExtract)
+            SolveResult result = ((System.Threading.Tasks.Task<SolveResult>)task).Result;
+            var assertions = result.getConstraints(); 
+            // Fetch and print constraints in SMT-LIB2 format
+            using (var writer = new System.IO.StringWriter())
             {
-                var result = ((System.Threading.Tasks.Task<ApplyResult>)task).Result;
-                bldTask = result.GetOutputModel(
-                    modName,
-                    new ProgramName(string.Format("{0}{1}.4ml", ProgramName.EnvironmentScheme, modName)),
-                    modName);
-
-                if (bldTask == null)
+                foreach (var assertion in assertions)
                 {
-                    sink.WriteMessageLine(string.Format("There is no output named {0}.", modName), SeverityKind.Warning);
-                    return;
+                    writer.WriteLine(assertion.ToString()); // Adjust this if there's a specific method to get SMT-LIB2 format
                 }
-
-                bldTask.Wait();
-            }
-            else
-            {
-                SolveResult result = ((System.Threading.Tasks.Task<SolveResult>)task).Result;
-                var assertions = result.getConstraints(); 
-                // Fetch and print constraints in SMT-LIB2 format
-                using (var writer = new System.IO.StringWriter())
-                {
-                    foreach (var assertion in assertions)
-                    {
-                        writer.WriteLine(assertion.ToString()); // Adjust this if there's a specific method to get SMT-LIB2 format
-                    }
-                    string smtLib2Format = writer.ToString();
-                    sink.WriteMessageLine(smtLib2Format);
-                }
+                string smtLib2Format = writer.ToString();
+                sink.WriteMessageLine(smtLib2Format);
             }
         }
-
-
 
         private void DoConfigHelp(string s)
         {
