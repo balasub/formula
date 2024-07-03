@@ -31,6 +31,10 @@
             private set;
         }
 
+        public Z3.BoolExpr[] getConstraints(){
+            return solver.Z3Solver.Assertions;
+        }
+
         public DateTime StopTime
         {
             get;
