@@ -65,7 +65,7 @@ namespace Microsoft.Formula.CommandLine
         private const string WatchMsg = "Use: watch [off | on | prompt] to control watch behavior";
         private const string CoreMsg = "Prints reduced rule set for domains / transforms. Use: core module_name";
         private const string DowngradeMsg = "Attempts to downgrade a (partial) model to Formula V1. Use: downgrade module_name";
-        private const string FetchConstraintsMsg = "Attemps to fetch the constraints in the domain";
+        private const string FetchConstraintsMsg = "Attemps to fetch the constraints in the domain. Use: constraints (app_id | solv_id n) output_name [render_class render_dll]";
 
 
         private SpinLock cmdLock = new SpinLock();
@@ -2141,7 +2141,7 @@ namespace Microsoft.Formula.CommandLine
             var cmdParts = s.Split(cmdSplitChars, 4, StringSplitOptions.RemoveEmptyEntries);
             if (cmdParts.Length < 2 || cmdParts.Length > 5)
             {
-                sink.WriteMessageLine(ExtractMsg, SeverityKind.Warning);
+                sink.WriteMessageLine(FetchConstraintsMsg, SeverityKind.Warning);
                 return;
             }
 
