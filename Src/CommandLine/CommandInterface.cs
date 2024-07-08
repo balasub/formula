@@ -2174,16 +2174,17 @@ namespace Microsoft.Formula.CommandLine
 
             SolveResult result = ((System.Threading.Tasks.Task<SolveResult>)task).Result;
             var assertions = result.getConstraints(); 
-            // Fetch and print constraints in SMT-LIB2 format
-            using (var writer = new System.IO.StringWriter())
-            {
-                foreach (var assertion in assertions)
-                {
-                    writer.WriteLine(assertion.ToString()); // Adjust this if there's a specific method to get SMT-LIB2 format
-                }
-                string smtLib2Format = writer.ToString();
-                sink.WriteMessageLine(smtLib2Format);
-            }
+            // // Fetch and print constraints in SMT-LIB2 format
+            // using (var writer = new System.IO.StringWriter())
+            // {
+            //     foreach (var assertion in assertions)
+            //     {
+            //         writer.WriteLine(assertion.ToString()); // Adjust this if there's a specific method to get SMT-LIB2 format
+            //     }
+            //     string smtLib2Format = writer.ToString();
+            //     sink.WriteMessageLine(smtLib2Format);
+            // }
+            sink.WriteMessageLine(assertions);
         }
 
         private void DoConfigHelp(string s)
