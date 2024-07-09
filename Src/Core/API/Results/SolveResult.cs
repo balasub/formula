@@ -32,7 +32,9 @@
         }
 
         public string getConstraints(){
-            return solver.Z3Solver.ToString();
+            String constraints = solver.Z3Solver.ToString();
+            constraints = constraints.Replace("pm@~SC2VAR~", "");
+            return constraints;
         }
 
         public DateTime StopTime
