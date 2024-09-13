@@ -340,14 +340,19 @@ namespace Microsoft.Formula.Solver
             Term comprTerms = facts.GetSymbolicCountTerm(x.Args[2], index);
 
             int numTerms = comprTerms.Args.Count() - 2;
-            Z3Expr[] termExprs = new Z3Expr[numTerms];
+            List<Z3Expr>[] termExprs = new List<Z3Expr>[numTerms];
             Z3BoolExpr[] boolExprs = new Z3BoolExpr[numTerms];
             Term normalized;
 
             for (int i = 0; i < comprTerms.Args.Count() - 2; i++)
             {
-                var e1Term = comprTerms.Args[i + 2].Args[0];
-                termExprs[i] = GetTerm(e1Term, out normalized, facts);
+                termExprs[i] = new List<Z3Expr>();
+                for (int j = 0; j < comprTerms.Args[i + 2].Args.Length; j++)
+                {
+                    var t = comprTerms.Args[i + 2].Args[j];
+                    termExprs[i].Add(GetTerm(t, out normalized, facts));
+                }
+
                 boolExprs[i] = facts.GetSideConstraints(comprTerms.Args[i + 2]); // TODO: check if we need comprTerms.Args[i + 2].Args[0] here
             }
 
@@ -369,7 +374,13 @@ namespace Microsoft.Formula.Solver
                 List<Z3BoolExpr> currExprs = new List<Z3BoolExpr>();
                 for (int j = i + 1; j < numTerms; j++)
                 {
-                    currExpr = facts.Solver.Context.MkEq(termExprs[i], termExprs[j]);
+                    currExpr = facts.Solver.Context.MkEq(termExprs[i].ElementAt(0), termExprs[j].ElementAt(0));
+                    for (int k = 1; k < termExprs[i].Count; k++)
+                    {
+                        var tempExpr = facts.Solver.Context.MkEq(termExprs[i].ElementAt(k), termExprs[j].ElementAt(k));
+                        currExpr = facts.Solver.Context.MkAnd(currExpr, tempExpr);
+                    }
+
                     currExpr = facts.Solver.Context.MkAnd(currExpr, boolExprs[i]);
                     currExpr = facts.Solver.Context.MkAnd(currExpr, boolExprs[j]);
                     currExprs.Add(currExpr);
