@@ -1603,6 +1603,11 @@
             bool wasAdded;
             var res = facts.Query(values[0].Binding, out nResults);
 
+            if (nResults == 0)
+            {
+                return facts.Index.MkCnst(new Rational(nResults), out wasAdded);
+            }
+
             int baseCount = 0; // always 0 for now
             List<Term> realTerms = new List<Term>();
             List<Term> fakeTerms = new List<Term>();
