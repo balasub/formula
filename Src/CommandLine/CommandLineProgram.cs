@@ -21,8 +21,8 @@
 
                 //// If errors occured while parsing switches
                 //// then treat this an exit condition.
-                bool isExit;
-                ci.DoOptions(out isExit);
+                bool isExit, isNonInteractive;
+                ci.DoOptions(out isExit, out isNonInteractive);
                 if (isExit || sink.PrintedError)
                 {
                     Environment.ExitCode = sink.PrintedError ? 1 : 0;
@@ -30,7 +30,8 @@
                 }
 
                 if (OperatingSystem.IsMacOS() &&
-                    chooser.Interactive)
+                    chooser.Interactive &&
+                    !isNonInteractive)
                 {
                     InteractivePrompt.Run(ci);
                     Environment.ExitCode = sink.PrintedError ? 1 : 0;
