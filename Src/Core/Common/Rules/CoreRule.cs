@@ -1468,6 +1468,14 @@
                                 terms.Add(term);
                             }
                         }
+                        else if (term.Groundness == Groundness.Variable && term.Symbol is ConSymb)
+                        {
+                            ConSymb conSymb = (ConSymb)term.Symbol;
+                            if (!conSymb.IsAutoGen)
+                            {
+                                terms.Add(term);
+                            }
+                        }
                     }
 
                     for (int i = 0; i < terms.Count - 1; i++)
