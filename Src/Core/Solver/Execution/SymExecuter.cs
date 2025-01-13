@@ -883,6 +883,8 @@
 
                     prevSolutions.Add(solutionMap);
                     solutionStrings.Add(GetNewKindConstructors(model));
+                    solutionStrings[solutionStrings.Count - 1] = solutionStrings[solutionStrings.Count - 1].Distinct().ToList();
+                    solutionStrings[solutionStrings.Count - 1].Sort(System.StringComparer.Ordinal);
                 }
                 else if (status == Z3.Status.UNSATISFIABLE)
                 {
@@ -973,6 +975,8 @@
 
                     prevSolutions.Add(solutionMap);
                     solutionStrings.Add(GetNewKindConstructors(model));
+                    solutionStrings[solutionStrings.Count - 1] = solutionStrings[solutionStrings.Count - 1].Distinct().ToList();
+                    solutionStrings[solutionStrings.Count - 1].Sort(System.StringComparer.Ordinal);
                 }
                 else
                 {
