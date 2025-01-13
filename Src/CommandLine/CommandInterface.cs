@@ -28,6 +28,8 @@ namespace Microsoft.Formula.CommandLine
         public const string ExitCommand = "exit";
         public const string ExitShortCommand = "x";
 
+        public const string NonInteractiveCommand = "noninteractive";
+
         private const string BusyMsg = "Busy; cancel or wait until operation completes";
         private const string UnkCmdMsg = "Unknown command '{0}'";
         private const string UnkSwitchMsg = "Unknown switch '{0}'";
@@ -373,9 +375,10 @@ namespace Microsoft.Formula.CommandLine
         {
         }
 
-        internal bool DoOptions(out bool isExit)
+        internal bool DoOptions(out bool isExit, out bool isNonInteractive)
         {
             isExit = false;
+            isNonInteractive = false;
 
             if (!GetCommandLock())
             {
@@ -408,6 +411,11 @@ namespace Microsoft.Formula.CommandLine
                     {
                         sink.WriteMessageLine(opt.Item1);
                         isExit = true;
+                        break;
+                    }
+                    else if (opt.Item1 == NonInteractiveCommand)
+                    {
+                        isNonInteractive = true;
                         break;
                     }
                     else if (opt.Item2.Count == 0)
