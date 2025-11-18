@@ -48,6 +48,11 @@ htmlcov/
 *.jar
 *.interp
 *.tokens
+# Generated parser files (run scripts/generate_parser.sh to create)
+formula/parser/FormulaLexer.py
+formula/parser/FormulaParser.py
+formula/parser/FormulaVisitor.py
+formula/parser/FormulaListener.py
 
 # Distribution
 dist/

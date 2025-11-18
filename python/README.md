@@ -27,13 +27,21 @@ formula/
 
 ### From Source
 
+**IMPORTANT**: You must generate the ANTLR parser files before running tests or using the library.
+
 ```bash
-# Install dependencies
+# 1. Install dependencies
 pip install -e ".[dev]"
 
-# Generate ANTLR4 parser (requires Java)
+# 2. Generate ANTLR4 parser (requires Java 8+)
+cd /path/to/formula/python
 ./scripts/generate_parser.sh
 ```
+
+This will:
+- Download ANTLR 4.13.1 if not already present
+- Generate `FormulaLexer.py`, `FormulaParser.py`, and `FormulaVisitor.py`
+- Place generated files in `formula/parser/`
 
 ## Dependencies
 
@@ -58,15 +66,18 @@ Use the provided script to regenerate:
 
 ## Migration Status
 
-This Python port is being developed in stages:
+**Core migration: COMPLETE ✓**
+
+This Python port has been developed in stages:
 - [x] Project structure and setup
-- [ ] Parser generation and integration
-- [ ] Core data structures
-- [ ] AST node classes
-- [ ] Compiler
-- [ ] Solver
-- [ ] API
-- [ ] Testing infrastructure
+- [x] Parser generation and integration
+- [x] Core data structures (symbols, terms, rules)
+- [x] AST node classes (29 types)
+- [x] Compiler (namespace, symbol table)
+- [x] Solver (Z3 integration)
+- [x] Testing infrastructure (50+ tests)
+
+See `MIGRATION_STATUS.md` for detailed progress information.
 
 ## Original Project
 
