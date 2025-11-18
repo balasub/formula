@@ -17,6 +17,7 @@ from ..api.nodes import (
     Domain,
     Model,
     Transform,
+    Machine,
     Rule,
     Id,
     Cnst,
@@ -174,7 +175,10 @@ class ASTBuilder(FormulaParserVisitor):
             self.visit(ctx.model())
         elif ctx.transform():
             self.visit(ctx.transform())
-        # TODO: Add machine, tsystem
+        elif ctx.machine():
+            self.visit(ctx.machine())
+        elif ctx.tSystem():
+            self.visit(ctx.tSystem())
 
         return None
 
@@ -252,6 +256,135 @@ class ASTBuilder(FormulaParserVisitor):
         if ctx.rule():
             self.visit(ctx.rule())
         # TODO: Add other sentence types (conDecl, mapDecl, etc.)
+
+        return None
+
+    # ============================================================================
+    # Model visitors
+    # ============================================================================
+
+    def visitModel(self, ctx: FormulaParser.ModelContext):
+        """Visit a model declaration."""
+        # Visit the signature
+        self.visit(ctx.modelSigConfig())
+
+        # Visit sentences
+        if ctx.modelBody():
+            self.visit(ctx.modelBody())
+
+        self._end_module()
+        return None
+
+    def visitModelSigConfig(self, ctx: FormulaParser.ModelSigConfigContext):
+        """Visit model signature and config."""
+        if ctx.config():
+            # TODO: Handle config
+            pass
+
+        self.visit(ctx.modelSig())
+        return None
+
+    def visitModelSig(self, ctx: FormulaParser.ModelSigContext):
+        """Visit model signature."""
+        name = ctx.BAREID().getText()
+
+        # Check if partial model
+        is_partial = ctx.PARTIAL() is not None
+
+        # Determine composition kind
+        compose_kind = ComposeKind.NONE
+        if ctx.modelIntro():
+            intro_ctx = ctx.modelIntro()
+            if intro_ctx.EXTENDS():
+                compose_kind = ComposeKind.EXTENDS
+            elif intro_ctx.INCLUDES():
+                compose_kind = ComposeKind.INCLUDES
+
+        # Create model node
+        span = self.to_span(ctx)
+        model = Model(span, name, is_partial, compose_kind)
+        self.parse_result.program.add_module(model)
+        self.current_module = model
+
+        # Visit compositions if present
+        if ctx.modelIntro() and ctx.modelIntro().modRefs():
+            self.visit(ctx.modelIntro().modRefs())
+
+        return None
+
+    # ============================================================================
+    # Transform visitors
+    # ============================================================================
+
+    def visitTransform(self, ctx: FormulaParser.TransformContext):
+        """Visit a transform declaration."""
+        # Visit the signature
+        self.visit(ctx.transformSigConfig())
+
+        # Visit body
+        if ctx.transformRest():
+            self.visit(ctx.transformRest())
+
+        self._end_module()
+        return None
+
+    def visitTransformSigConfig(self, ctx: FormulaParser.TransformSigConfigContext):
+        """Visit transform signature and config."""
+        if ctx.config():
+            # TODO: Handle config
+            pass
+
+        self.visit(ctx.transformSig())
+        return None
+
+    def visitTransformSig(self, ctx: FormulaParser.TransformSigContext):
+        """Visit transform signature."""
+        name = ctx.BAREID().getText()
+
+        # Create transform node
+        span = self.to_span(ctx)
+        transform = Transform(span, name)
+        self.parse_result.program.add_module(transform)
+        self.current_module = transform
+
+        # TODO: Visit parameters and inputs/outputs
+
+        return None
+
+    # ============================================================================
+    # Machine visitors
+    # ============================================================================
+
+    def visitMachine(self, ctx: FormulaParser.MachineContext):
+        """Visit a machine declaration."""
+        # Visit the signature
+        self.visit(ctx.machineSigConfig())
+
+        # Visit body
+        if ctx.machineBody():
+            self.visit(ctx.machineBody())
+
+        self._end_module()
+        return None
+
+    def visitMachineSigConfig(self, ctx: FormulaParser.MachineSigConfigContext):
+        """Visit machine signature and config."""
+        if ctx.config():
+            # TODO: Handle config
+            pass
+
+        self.visit(ctx.machineSig())
+        return None
+
+    def visitMachineSig(self, ctx: FormulaParser.MachineSigContext):
+        """Visit machine signature."""
+        name = ctx.BAREID().getText()
+
+        # Create machine node
+        span = self.to_span(ctx)
+        machine = Machine(span, name)
+        self.parse_result.program.add_module(machine)
+        self.current_module = machine
 
         return None
 
