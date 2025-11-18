@@ -53,11 +53,15 @@ from .step import Step
 from .update import Update
 from .property import Property
 
+# Program node
+from .program import Program
+
 __all__ = [
     # Base
     "Span",
     "ProgramName",
     "Node",
+    "Program",
     # Basic
     "Id",
     "Cnst",
