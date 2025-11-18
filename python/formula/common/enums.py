@@ -177,6 +177,32 @@ class OpKind(Enum):
     TO_ORDINAL = auto()
     TO_STRING = auto()
     TUPLE_GET = auto()
+    SYM_AND = auto()
+    SYM_AND_ALL = auto()
+    SYM_OR = auto()
+    SYM_OR_ALL = auto()
+    SYM_COUNT = auto()
+    SYM_MAX = auto()
+    SYM_MAX_ALL = auto()
+    SYM_MIN = auto()
+    SYM_MIN_ALL = auto()
+
+
+class ReservedOpKind(Enum):
+    """Reserved operation kinds for internal compiler operations."""
+    RANGE = auto()       # Range(x, y): Construct a type for integers in [x, y]
+    TYPE_UNN = auto()    # TypeUnn(x, y): Union of types x and y
+    RELABEL = auto()     # Relabel(p, p', x): Relabel constructor application prefixes
+    SELECT = auto()      # Select(x, y): Get argument named y from data term x
+    FIND = auto()        # Find(t, p, tp): Find operation binding t, pattern p, type tp
+    CONJ = auto()        # Conj(x, y): Conjunction of two body constraints
+    CONJ_R = auto()      # ConjR(x, y): Conjunction of two disjoint partial rules
+    DISJ = auto()        # Disj(x, y): Disjunction of two partial rules
+    PROJ = auto()        # Proj(rule, vars): Projection of a partial rule
+    P_RULE = auto()      # PRule(f1, f2, body): Partial rule with finds f1, f2
+    C_RULE = auto()      # CRule(h, compr, rule): Rule computing comprehension
+    RULE = auto()        # Rule(h, rule): Complete rule as a term
+    COMPR = auto()       # Compr(heads, reads, disj): Comprehension
 
 
 class InstallKind(Enum):

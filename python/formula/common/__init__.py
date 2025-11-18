@@ -21,11 +21,22 @@ from .enums import (
     SeverityKind,
     NodeKind,
     OpKind,
+    ReservedOpKind,
     InstallKind,
 )
 from .rational import Rational, LiftedRational
 from .immutable_array import ImmutableArray
-from .symbols import Symbol, BaseSortSymb, BaseCnstSymb
+from .symbols import (
+    Symbol,
+    BaseSortSymb,
+    BaseCnstSymb,
+    UserCnstSymb,
+    ConSymb,
+    MapSymb,
+    UnnSymb,
+    UserSortSymb,
+    BaseOpSymb,
+)
 from .terms import Term
 
 __all__ = [
@@ -42,6 +53,7 @@ __all__ = [
     "SeverityKind",
     "NodeKind",
     "OpKind",
+    "ReservedOpKind",
     "InstallKind",
     # Core types
     "Rational",
@@ -51,6 +63,12 @@ __all__ = [
     "Symbol",
     "BaseSortSymb",
     "BaseCnstSymb",
+    "UserCnstSymb",
+    "ConSymb",
+    "MapSymb",
+    "UnnSymb",
+    "UserSortSymb",
+    "BaseOpSymb",
     # Terms
     "Term",
 ]
