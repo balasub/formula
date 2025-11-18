@@ -725,10 +725,7 @@
             bool keepDerivations,
             Map<Term, Set<Derivation>> pending)
         {
-            if (initStatus == InitStatusKind.Uninit)
-            {
-                initStatus = Initialize(index) ? InitStatusKind.Success : InitStatusKind.Fail;
-            }
+            initStatus = Initialize(index) ? InitStatusKind.Success : InitStatusKind.Fail;
 
             if (initStatus == InitStatusKind.Fail)
             {

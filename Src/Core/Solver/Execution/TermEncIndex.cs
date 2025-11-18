@@ -155,6 +155,49 @@ namespace Microsoft.Formula.Solver
             }
         }
 
+        protected Z3ArithExpr GetArithExpr(Z3Expr expr, SymExecuter facts)
+        {
+            if (expr is Z3ArithExpr)
+            {
+                return (Z3ArithExpr)expr;
+            }
+
+            ArithExpr arithExpr = null;
+            Z3BoolExpr constraint = null;
+            var embedding = Solver.TypeEmbedder.GetEmbedding(expr.Sort);
+            if (embedding is NaturalEmbedding)
+            {
+                arithExpr = (embedding as NaturalEmbedding).UnboxingFun.Apply(new Z3Expr[] { expr }) as ArithExpr;
+                if (arithExpr != null)
+                {
+                    constraint = Solver.Context.MkGt(arithExpr, Solver.Context.MkInt(-1));
+                }
+            }
+            else if (embedding is PosIntegerEmbedding)
+            {
+                arithExpr = (embedding as PosIntegerEmbedding).UnboxingFun.Apply(new Z3Expr[] { expr }) as ArithExpr;
+                if (arithExpr != null)
+                {
+                    constraint = Solver.Context.MkGt(arithExpr, Solver.Context.MkInt(0));
+                }
+            }
+            else if (embedding is NegIntegerEmbedding)
+            {
+                arithExpr = (embedding as NegIntegerEmbedding).UnboxingFun.Apply(new Z3Expr[] { expr }) as ArithExpr;
+                if (arithExpr != null)
+                {
+                    constraint = Solver.Context.MkLt(arithExpr, Solver.Context.MkInt(0));
+                }
+            }
+
+            if (constraint != null)
+            {
+                facts.AddEmbeddingConstraint(expr, constraint);
+            }
+
+            return arithExpr;
+        }
+
         /// <summary>
         /// Returns an encoding of this term, possibly after applying some normalizing rewrites. 
         /// </summary>
@@ -233,38 +276,41 @@ namespace Microsoft.Formula.Solver
                     }
                     else if (x.Symbol.Kind == SymbolKind.BaseOpSymb)
                     {
+                        Z3ArithExpr arithExpr1 = GetArithExpr(ch.ElementAt(0), facts);
+                        Z3ArithExpr arithExpr2 = GetArithExpr(ch.ElementAt(1), facts);
+
                         switch (((BaseOpSymb)x.Symbol).OpKind)
                         {
                             case OpKind.Add:
-                                encp = Solver.TypeEmbedder.Context.MkAdd((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1));
+                                encp = Solver.TypeEmbedder.Context.MkAdd(arithExpr1, arithExpr2);
                                 encodings.Add(x, encp);
                                 return encp;
                             case OpKind.Sub:
-                                encp = Solver.TypeEmbedder.Context.MkSub((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1));
+                                encp = Solver.TypeEmbedder.Context.MkSub(arithExpr1, arithExpr2);
                                 encodings.Add(x, encp);
                                 return encp;
                             case OpKind.Mul:
-                                encp = Solver.TypeEmbedder.Context.MkMul((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1));
+                                encp = Solver.TypeEmbedder.Context.MkMul(arithExpr1, arithExpr2);
                                 encodings.Add(x, encp);
                                 return encp;
                             case OpKind.Div:
-                                encp = Solver.TypeEmbedder.Context.MkDiv((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1));
+                                encp = Solver.TypeEmbedder.Context.MkDiv(arithExpr1, arithExpr2);
                                 encodings.Add(x, encp);
                                 return encp;
                             case RelKind.Lt:
-                                encp = Solver.TypeEmbedder.Context.MkLt((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1));
+                                encp = Solver.TypeEmbedder.Context.MkLt(arithExpr1, arithExpr2);
                                 encodings.Add(x, encp);
                                 return encp;
                             case RelKind.Le:
-                                encp = Solver.TypeEmbedder.Context.MkLe((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1));
+                                encp = Solver.TypeEmbedder.Context.MkLe(arithExpr1, arithExpr2);
                                 encodings.Add(x, encp);
                                 return encp;
                             case RelKind.Gt:
-                                encp = Solver.TypeEmbedder.Context.MkGt((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1));
+                                encp = Solver.TypeEmbedder.Context.MkGt(arithExpr1, arithExpr2);
                                 encodings.Add(x, encp);
                                 return encp;
                             case RelKind.Ge:
-                                encp = Solver.TypeEmbedder.Context.MkGe((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1));
+                                encp = Solver.TypeEmbedder.Context.MkGe(arithExpr1, arithExpr2);
                                 encodings.Add(x, encp);
                                 return encp;
                             case RelKind.Neq:
@@ -305,7 +351,7 @@ namespace Microsoft.Formula.Solver
                                 return orExpr;
                             case OpKind.SymMax:
                                 encp = Solver.TypeEmbedder.Context.MkITE(
-                                    Solver.TypeEmbedder.Context.MkGt((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1)), 
+                                    Solver.TypeEmbedder.Context.MkGt(arithExpr1, arithExpr2),
                                     ch.ElementAt(0), ch.ElementAt(1));
                                 encodings.Add(x, encp);
                                 return encp;
@@ -315,7 +361,7 @@ namespace Microsoft.Formula.Solver
                                 return maxExpr;
                             case OpKind.SymMin:
                                 encp = Solver.TypeEmbedder.Context.MkITE(
-                                    Solver.TypeEmbedder.Context.MkLt((Z3ArithExpr)ch.ElementAt(0), (Z3ArithExpr)ch.ElementAt(1)), 
+                                    Solver.TypeEmbedder.Context.MkLt(arithExpr1, arithExpr2),
                                     ch.ElementAt(0), ch.ElementAt(1));
                                 encodings.Add(x, encp);
                                 return encp;

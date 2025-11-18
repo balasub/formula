@@ -1205,7 +1205,7 @@
                 }
                 else
                 {
-                    facts.Encoder.GetTerm(t1, out normalized);
+                    facts.Encoder.GetTerm(t1, out normalized, facts);
                 }
 
                 if (t2.Symbol.Kind == SymbolKind.UserCnstSymb && t2.Symbol.IsVariable)
@@ -1216,11 +1216,11 @@
                 }
                 else
                 {
-                    facts.Encoder.GetTerm(t2, out normalized);
+                    facts.Encoder.GetTerm(t2, out normalized, facts);
                 }
 
                 // Encode the Term with Z3
-                facts.Encoder.GetTerm(res, out normalized);
+                facts.Encoder.GetTerm(res, out normalized, facts);
                 return res;
             }
             else
@@ -2315,7 +2315,7 @@
                     }
                     else
                     {
-                        facts.Encoder.GetTerm(currTerm, out normalized);
+                        facts.Encoder.GetTerm(currTerm, out normalized, facts);
                     }
 
                     if (currExpr == null)
@@ -2330,7 +2330,7 @@
                     }
                 }
 
-                facts.Encoder.GetTerm(currExpr, out normalized);
+                facts.Encoder.GetTerm(currExpr, out normalized, facts);
                 return currExpr;
             }
             else

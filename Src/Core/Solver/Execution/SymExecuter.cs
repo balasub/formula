@@ -79,6 +79,9 @@
 
         private bool isJoinMatch = false;
 
+        private Dictionary<Z3Expr, Z3BoolExpr> embeddingConstraints =
+            new Dictionary<Z3Expr, Z3BoolExpr>();
+
         private Dictionary<int, Z3BoolExpr> recursionConstraints =
             new Dictionary<int, Z3BoolExpr>();
 
@@ -109,6 +112,14 @@
 
         public Map<Term, Term> varToTypeMap =
             new Map<Term, Term>(Term.Compare);
+
+        public void AddEmbeddingConstraint(Z3Expr expr, Z3BoolExpr boolExpr)
+        {
+            if (!this.embeddingConstraints.ContainsKey(expr))
+            {
+                this.embeddingConstraints.Add(expr, boolExpr);
+            }
+        }
 
         public static int CompareTupleTerms(Tuple<Term, Term> x,
                                             Tuple<Term, Term> y)
@@ -848,6 +859,11 @@
                     assumptions.Add(kvp.Value);
                 }
 
+                foreach (var kvp in embeddingConstraints)
+                {
+                    assumptions.Add(kvp.Value);
+                }
+
                 assumptions = assumptions.Distinct().ToList();
                 if (assumptions.IsEmpty())
                 {
@@ -921,7 +937,6 @@
             StringBuilder sb = new StringBuilder();
             if (num < solutionStrings.Count)
             {
-                sb.AppendLine("Solution number " + num);
                 foreach (var str in solutionStrings[num])
                 {
                     sb.AppendLine(str);
@@ -986,7 +1001,6 @@
 
             if (num < solutionStrings.Count)
             {
-                sb.AppendLine("Solution number " + num);
                 foreach (var str in solutionStrings[num])
                 {
                     sb.AppendLine(str);
@@ -1339,6 +1353,24 @@
                                 int index = (interp == null) ? 0 : ((Z3.BitVecNum)interp.Args[0]).Int;
                                 str = enumEmbedding.GetSymbolAtIndex(index);
                             }
+                            else if (embedding is NaturalEmbedding)
+                            {
+                                var natEmbedding = (NaturalEmbedding)embedding;
+                                var res = natEmbedding.UnboxingFun.Apply(new Z3Expr[] { interp });
+                                str = ((Z3.IntNum)interp.Args[0]).ToString();
+                            }
+                            else if (embedding is PosIntegerEmbedding)
+                            {
+                                var posEmbedding = (PosIntegerEmbedding)embedding;
+                                var res = posEmbedding.UnboxingFun.Apply(new Z3Expr[] { interp });
+                                str = ((Z3.IntNum)interp.Args[0]).ToString();
+                            }
+                            else if (embedding is NegIntegerEmbedding)
+                            {
+                                var negEmbedding = (NegIntegerEmbedding)embedding;
+                                var res = negEmbedding.UnboxingFun.Apply(new Z3Expr[] { interp });
+                                str = ((Z3.IntNum)interp.Args[0]).ToString();
+                            }
                             else if (interp == null)
                             {
                                 // If there were no constraints on the term, use the default
@@ -1438,15 +1470,22 @@
                     }
                     else if (x.Symbol.IsDataConstructor)
                     {
-                        string str = x.Symbol.PrintableName;
-                        str += "(";
-                        for (int i = 0; i < ch.Count(); i++)
+                        if (x.Groundness == Groundness.Ground)
                         {
-                            str += ch.ElementAt(i);
-                            str += i == ch.Count() - 1 ? "" : ", ";
+                            return x.ToString();
                         }
-                        str += ")";
-                        return str;
+                        else
+                        {
+                            string str = x.Symbol.PrintableName;
+                            str += "(";
+                            for (int i = 0; i < ch.Count(); i++)
+                            {
+                                str += ch.ElementAt(i);
+                                str += i == ch.Count() - 1 ? "" : ", ";
+                            }
+                            str += ")";
+                            return str;
+                        }
                     }
                     else
                     {
