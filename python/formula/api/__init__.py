@@ -8,7 +8,20 @@ This module contains the public API including:
 - Result types
 """
 
-from .nodes import Span, ProgramName, Node, Id, Cnst
+from .nodes import (
+    Span,
+    ProgramName,
+    Node,
+    Id,
+    Cnst,
+    Range,
+    FuncTerm,
+    ModRef,
+    Union,
+    Body,
+    Config,
+    Rule,
+)
 
 __all__ = [
     "Span",
@@ -16,4 +29,11 @@ __all__ = [
     "Node",
     "Id",
     "Cnst",
+    "Range",
+    "FuncTerm",
+    "ModRef",
+    "Union",
+    "Body",
+    "Config",
+    "Rule",
 ]
