@@ -28,13 +28,13 @@ class Term:
     FAMILY_USR_CNST = 2
     FAMILY_APP = 3
 
-    def __init__(self, symbol: Symbol, args: List['Term'], owner: 'TermIndex'):
+    def __init__(self, symbol: Symbol, args, owner: 'TermIndex'):
         """
         Create a term.
 
         Args:
             symbol: The symbol for this term
-            args: The argument terms (must match symbol arity)
+            args: The argument terms (must match symbol arity) - list or tuple
             owner: The term index that owns this term
 
         Raises:
@@ -46,7 +46,11 @@ class Term:
         self._uid: int = -1
         self._owner = owner
         self._symbol = symbol
-        self._args = ImmutableArray(args)
+        # Convert to tuple if it's a list
+        if isinstance(args, (list, tuple)):
+            self._args = ImmutableArray(args)
+        else:
+            self._args = args  # Already an ImmutableArray
         self._groundness = self._compute_groundness()
 
     @property
@@ -211,14 +215,46 @@ class Term:
         return False
 
     def __eq__(self, other: object) -> bool:
-        """Check equality based on UID."""
-        if isinstance(other, Term):
+        """
+        Check equality.
+
+        Uses structural equality if UIDs not set, UID-based equality otherwise.
+        """
+        if not isinstance(other, Term):
+            return False
+
+        # If both have UIDs, use UID-based equality
+        if self._uid != -1 and other._uid != -1:
             return self._uid == other._uid
-        return False
+
+        # Otherwise use structural equality
+        if self._symbol != other._symbol:
+            return False
+
+        if len(self._args) != len(other._args):
+            return False
+
+        for a1, a2 in zip(self._args, other._args):
+            if a1 is not a2:  # Use identity for args with UIDs
+                return False
+
+        return True
 
     def __hash__(self) -> int:
-        """Get hash based on UID."""
-        return hash(self._uid)
+        """
+        Get hash code.
+
+        Uses structural hash if UID not set, UID-based hash otherwise.
+        """
+        if self._uid != -1:
+            return hash(self._uid)
+
+        # Structural hash
+        h = hash(self._symbol.id)
+        for arg in self._args:
+            # Use arg's UID if available, otherwise identity
+            h ^= hash(arg._uid if arg._uid != -1 else id(arg))
+        return h
 
     def __repr__(self) -> str:
         """Get string representation."""

@@ -37,7 +37,7 @@ from .symbols import (
     UserSortSymb,
     BaseOpSymb,
 )
-from .terms import Term
+from .terms import Term, TermIndex
 
 __all__ = [
     # Enums
@@ -71,4 +71,5 @@ __all__ = [
     "BaseOpSymb",
     # Terms
     "Term",
+    "TermIndex",
 ]
