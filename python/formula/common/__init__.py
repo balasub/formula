@@ -8,4 +8,49 @@ This module contains core data structures including:
 - Composites: Composite structures
 """
 
-__all__ = []
+from .enums import (
+    Groundness,
+    SymbolKind,
+    BaseSortKind,
+    UserCnstSymbKind,
+    CnstKind,
+    ContractKind,
+    ComposeKind,
+    RelKind,
+    MapKind,
+    SeverityKind,
+    NodeKind,
+    OpKind,
+    InstallKind,
+)
+from .rational import Rational, LiftedRational
+from .immutable_array import ImmutableArray
+from .symbols import Symbol, BaseSortSymb, BaseCnstSymb
+from .terms import Term
+
+__all__ = [
+    # Enums
+    "Groundness",
+    "SymbolKind",
+    "BaseSortKind",
+    "UserCnstSymbKind",
+    "CnstKind",
+    "ContractKind",
+    "ComposeKind",
+    "RelKind",
+    "MapKind",
+    "SeverityKind",
+    "NodeKind",
+    "OpKind",
+    "InstallKind",
+    # Core types
+    "Rational",
+    "LiftedRational",
+    "ImmutableArray",
+    # Symbols
+    "Symbol",
+    "BaseSortSymb",
+    "BaseCnstSymb",
+    # Terms
+    "Term",
+]
