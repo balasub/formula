@@ -2,9 +2,16 @@
 FORMULA compiler module.
 
 This module contains the compilation pipeline including:
-- Linters: Static analysis and validation
+- Symbol tables and namespaces
 - Type checking
+- Linters: Static analysis and validation
 - Constraint compilation
 """
 
-__all__ = []
+from .namespace import Namespace
+from .symbol_table import SymbolTable
+
+__all__ = [
+    "Namespace",
+    "SymbolTable",
+]
